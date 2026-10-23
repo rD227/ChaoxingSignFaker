@@ -11,6 +11,7 @@
 - 移除 Stackbricks、七牛配置、作者更新域名及原版包名校验。
 - 移除作者域名的远程黑名单请求。账号分享使用原版 `http://cdn.aquamarine5.fun/` 格式，兼容原版扫码、粘贴和 `cxsignfaker://import` 导入；同时兼容此前本版的 `rd227cxsignfaker://import` 链接。扫码和粘贴只在本地解析，浏览器打开则会将分享参数发送给原作者网站，网页可用性取决于该网站。
 - 无需搭建本项目的后端；账号与签到请求直接访问学习通，地图与定位继续使用百度 SDK。
+- 通过 [Android_CN_OAID 4.2.17](https://github.com/gzu-liyujiang/Android_CN_OAID/tree/4.2.17) 的厂商接口读取 OAID，沿用原版 AES 设备码算法；不引入友盟或统计上报，不用 UUID、Android ID、Google AAID 冒充 OAID。该依赖使用 MulanPSL-2.0。只迁移能够确认来自此前 UUID 算法的本人设备码，其他已保存设备码保留。读取失败时不标记为统一设备码；厂商支持、隐私设置及官方客户端实现可能不同，不能保证所有手机与官方学习通一致。此前分享出去的旧设备码，需要机主更新后重新分享、导入。
 
 ## GitHub 更新
 

@@ -284,7 +284,7 @@ private fun ConsistentDeviceCodeHelpDialog(
             ) {
                 Text(
                     buildAnnotatedString {
-                        append("▪ 为了给代签用户绑定统一的设备码，请让代签用户更新到随地大小签最新版本，然后此机去重新扫描随地大小签的用户页二维码或重新根据链接导入以绑定设备码。绑定设备码后，无论是在机主的学习通应用上、机主的随地大小签上和已经绑定过设备码的随地大小签进行代签上都会被学习通认为是同一台设备，不会在教师端检测出\"更换了签到设备\"。\n")
+                        append("▪ 为了给代签用户绑定统一的设备码，请让代签用户更新到随地大小签最新版本，然后此机去重新扫描随地大小签的用户页二维码或重新根据链接导入以绑定设备码。只有共享设备码与机主官方学习通实际使用的设备码一致时，才可能保持设备一致；OAID 受 ROM 支持和隐私设置影响，请实测，不保证所有设备都一致。\n")
                         append("▪ 没有绑定设备码的用户在使用随地大小签代签时，会在之后的所有签到上固定每个用户不同的随机设备码。随机设备码只能保证每次都使用随地大小签时不出现\"更换了签到设备\"，但如果代签用户在自己的学习通应用上、或其他随地大小签用户为此用户签到过一次，则还是会出现\"更换了签到设备\"的异常。\n")
                         append("▪ 已绑定设备码的代签用户会有")
                         appendInlineContent(checkIconId, "[已绑定统一设备码标识]")
@@ -2455,7 +2455,7 @@ fun OtherUserScreen(
             Spacer(modifier = Modifier.height(8.dp))
             NewFeatureTipsCard(
                 isConsistentDeviceCodeTooltipShowed,
-                tipsText = "现在支持给代签用户绑定统一的设备码，在绑定后进行代签时教师端不会被学习通检测出\"更换了签到设备\"。",
+                tipsText = "可通过分享绑定设备码；是否与官方学习通一致取决于机主手机和实际设备码，请实测。",
                 modifier = Modifier.padding(6.dp, 0.dp),
                 isAnimated = false,
                 trailingAction = {

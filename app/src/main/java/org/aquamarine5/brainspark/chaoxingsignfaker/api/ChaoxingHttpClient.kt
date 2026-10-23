@@ -275,8 +275,7 @@ class ChaoxingHttpClient internal constructor(
                 userEntity = userEntity,
                 name = userEntity.name,
                 puid = puid,
-                deviceCode = session.deviceCode.takeIf { it.isNotEmpty() }
-                    ?: ChaoxingDeviceInfoHelper.getCachedLocalMachineDeviceCode(context),
+                deviceCode = ChaoxingDeviceInfoHelper.getCachedLocalMachineDeviceCode(context),
                 initialConfiguredFid = effectiveConfiguredFid,
                 okHttpClient = client,
             ).apply {

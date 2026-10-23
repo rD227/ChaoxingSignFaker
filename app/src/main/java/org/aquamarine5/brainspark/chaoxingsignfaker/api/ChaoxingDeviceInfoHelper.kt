@@ -15,7 +15,16 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Base64
 import com.alibaba.fastjson2.JSONObject
+import com.github.gzuliyujiang.oaid.IGetter
+import com.github.gzuliyujiang.oaid.OAIDRom
+import com.github.gzuliyujiang.oaid.impl.OAIDFactory
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.coroutines.resume
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.chaoxingApplicationPackageName
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.chaoxingDataStore
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.requirePredictable
@@ -65,10 +74,14 @@ object ChaoxingDeviceInfoHelper {
             JSONObject.parseObject(output.toString(Charsets.UTF_8.name()))
         }.getOrNull()
 
-    @SuppressLint("GetInstance")
     suspend fun getLocalMachineDeviceCode(context: Context): String {
         val uniqueId = getLocalMachineUniqueId(context)
         if (uniqueId.isEmpty()) return ""
+        return encryptDeviceIdentifier(uniqueId)
+    }
+
+    @SuppressLint("GetInstance")
+    private fun encryptDeviceIdentifier(uniqueId: String): String {
         val cipher = Cipher.getInstance("AES/ECB/PKCS5Padding")
         cipher.init(
             Cipher.ENCRYPT_MODE,
@@ -81,18 +94,21 @@ object ChaoxingDeviceInfoHelper {
     }
 
     suspend fun getCachedLocalMachineDeviceCode(context: Context): String {
-        context.chaoxingDataStore.data.first().loginSession.deviceCode.takeIf { it.isNotEmpty() }
-            ?.let { return it }
+        val data = context.chaoxingDataStore.data.first()
+        val legacyDeviceCode = data.localDeviceIdentity.takeIf { it.isNotEmpty() }
+            ?.let(::encryptDeviceIdentifier)
+        val cachedDeviceCode = data.loginSession.deviceCode
+        if (cachedDeviceCode.isNotEmpty() && cachedDeviceCode != legacyDeviceCode) return cachedDeviceCode
         val generatedDeviceCode = getLocalMachineDeviceCode(context)
-        if (generatedDeviceCode.isEmpty()) return ""
         return context.chaoxingDataStore.updateData { currentDataStore ->
-            if (currentDataStore.loginSession.deviceCode.isNotEmpty()) {
+            if (currentDataStore.loginSession.deviceCode.isNotEmpty() &&
+                currentDataStore.loginSession.deviceCode != legacyDeviceCode) {
                 currentDataStore
             } else {
                 currentDataStore.toBuilder().setLoginSession(
                     currentDataStore.loginSession.toBuilder()
                         .setDeviceCode(generatedDeviceCode)
-                        .setIsNotRandomizedDeviceCode(true)
+                        .setIsNotRandomizedDeviceCode(generatedDeviceCode.isNotEmpty())
                         .build()
                 ).build()
             }
@@ -108,10 +124,33 @@ object ChaoxingDeviceInfoHelper {
     }
 
     private suspend fun getLocalMachineUniqueId(context: Context): String =
-        context.chaoxingDataStore.updateData { data ->
-            if (data.localDeviceIdentity.isNotEmpty()) data
-            else data.toBuilder().setLocalDeviceIdentity(UUID.randomUUID().toString()).build()
-        }.localDeviceIdentity
+        withContext(Dispatchers.Main.immediate) {
+            runCatching {
+                if ((OAIDRom.isXiaomi() || OAIDRom.isBlackShark() || OAIDRom.isMiui()) &&
+                    OAIDRom.isMiuiGlobal()) return@runCatching ""
+                val provider = OAIDFactory.ofManufacturer(context.applicationContext)
+                if (!provider.supported()) return@runCatching ""
+                withTimeoutOrNull(1_000L) {
+                    suspendCancellableCoroutine { continuation ->
+                        provider.doGet(object : IGetter {
+                            override fun onOAIDGetComplete(result: String) {
+                                val normalizedId = result.replace("-", "")
+                                val isValid = normalizedId.isNotBlank() &&
+                                    !Regex("(?i)(?:0+|f+)").matches(normalizedId)
+                                if (continuation.isActive) continuation.resume(if (isValid) result else "")
+                            }
+
+                            override fun onOAIDGetError(error: Exception) {
+                                if (continuation.isActive) continuation.resume("")
+                            }
+                        })
+                    }
+                }.orEmpty()
+            }.getOrElse { error ->
+                if (error is CancellationException) throw error
+                ""
+            }
+        }
 
     @SuppressLint("HardwareIds")
     private fun buildDeviceInfo(context: Context): JSONObject {

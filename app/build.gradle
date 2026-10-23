@@ -136,6 +136,7 @@ protobuf {
 }
 
 dependencies {
+    implementation 'com.github.gzu-liyujiang:Android_CN_OAID:4.2.17'
     implementation(libs.hyphenate.chat)
     implementation(libs.reorderable)
     implementation(libs.lbsyun.base)

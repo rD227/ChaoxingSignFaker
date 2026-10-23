@@ -332,8 +332,7 @@ open class ChaoxingHttpRequester internal constructor(
                 session.phoneNumber,
                 session.name,
                 resolvedPuid,
-                session.deviceCode.takeIf { it.isNotEmpty() }
-                    ?: ChaoxingDeviceInfoHelper.getCachedLocalMachineDeviceCode(context),
+                ChaoxingDeviceInfoHelper.getCachedLocalMachineDeviceCode(context),
                 resolvedFid,
             )
         }

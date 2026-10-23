@@ -31,9 +31,19 @@ dependencyResolutionManagement {
             url = uri("https://jitpack.io")
             content{
                 includeModule("com.github.ihsg","PatternLocker")
+                includeModule("com.github.gzu-liyujiang", "Android_CN_OAID")
             }
         }
         mavenCentral()
+
+        maven {
+            url = uri("https://developer.huawei.com/repo")
+            content { includeGroup("com.huawei.hms") }
+        }
+        maven {
+            url = uri("https://developer.hihonor.com/repo")
+            content { includeGroup("com.hihonor.mcs") }
+        }
 
     }
 }
