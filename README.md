@@ -1,65 +1,61 @@
-# ChaoxingSignFaker
+# ChaoxingSignFaker · rD227 修改版
 
-[![wakatime](https://wakatime.com/badge/github/aquamarine5/ChaoxingSignFaker.svg)](https://wakatime.com/badge/github/aquamarine5/ChaoxingSignFaker)
-[![](https://tokei.rs/b1/github/aquamarine5/ChaoxingSignFaker)](https://github.com/XAMPPRocky/tokei)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Faquamarine5%2FChaoxingSignFaker.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Faquamarine5%2FChaoxingSignFaker?ref=badge_shield)
-![GitHub Release Date](https://img.shields.io/github/release-date/aquamarine5/ChaoxingSignFaker)
-![GitHub top language](https://img.shields.io/github/languages/top/aquamarine5/ChaoxingSignFaker)
-![GitHub License](https://img.shields.io/github/license/aquamarine5/ChaoxingSignFaker)
-[![Download count](https://img.shields.io/github/downloads/aquamarine5/ChaoxingSignFaker/total)]()
+基于 [aquamarine5/ChaoxingSignFaker](https://github.com/aquamarine5/ChaoxingSignFaker) 修改，原作者为 aquamarine5 / Brainspark。保留原作者版权说明，继续使用 [GNU AGPL v3](LICENSE)。本修改版源码位于 [rD227/ChaoxingSignFaker](https://github.com/rD227/ChaoxingSignFaker)。
 
-<a href="https://trendshift.io/repositories/132022?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-132022" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/132022" alt="aquamarine5%2FChaoxingSignFaker | Trendshift" width="250" height="55"/></a>
+## 修改内容
 
-> [!CAUTION]
-> ChaoxingSignFaker（随地大小签）是一个开源应用，使用AGPLv3.0许可证发布。开源代码本源为让源代码对所有人开发，保持代码的开放性并欢迎任何人参与到项目的开发中来，但**不欢迎**任何形式的修改代码、名称等进行二次分发、换皮和商业化等行为。
+- 独立包名 `io.github.rd227.chaoxingsignfaker`，可与原版共存；Provider、权限、外部调用动作和分享深链接均使用独立标识。
+- 移除打赏界面、签到后的打赏弹窗和打赏资源。
+- 移除友盟 SDK、埋点、作者 Supabase 统计与排行榜、统计图表任务。
+- 移除 Sentry 插件、SDK 初始化、上传配置与远程崩溃上报；保留本机错误信息和用户提示。
+- 移除 Stackbricks、七牛配置、作者更新域名及原版包名校验。
+- 移除作者域名的远程黑名单请求；分享改用 `rd227cxsignfaker://import` 本地深链接，不经过作者网站。
+- 无需搭建本项目的后端；账号与签到请求直接访问学习通，地图与定位继续使用百度 SDK。
 
-> [!IMPORTANT]
-> ChaoxingSignFaker（随地大小签）仅作为交流学习使用，通过本项目加深前端设计、接口调用、数据库使用、网络通信安全等方面知识的理解。请勿将此项目用作商业用途。任何人或组织使用项目或项目中的代码进行的任何不正当违规和违法行为与作者无关，作者不承担任何因使用本应用而导致的法律或其他任何责任。
+## GitHub 更新
 
-## 使用
+应用每次进程冷启动检查一次：
 
-> [!NOTE]
-> ChaoxingSignFaker（随地大小签）需要Android 8.0+（`minSdk>=26`）版本。  
-> 此应用**并不支持**iPhone、iPad以及鸿蒙（仅HarmonyOS NEXT）操作系统，也并没有准备适配的计划，不过可以使用任意安卓手机在代签选项页通过账号密码登录从而为您的账号使用应用的大部分签到功能。
+```text
+https://api.github.com/repos/rD227/ChaoxingSignFaker/releases/latest
+```
 
-- 前往 [cdn.aquamarine5.fun](http://cdn.aquamarine5.fun) 下载最新版本。
-- 或前往 [Releases](https://github.com/aquamarine5/ChaoxingSignFaker) 的附件下载最新版本。
+只使用正式 Release，草稿和预发布不作为正式更新。没有 Release（HTTP 404）时显示“暂无正式 Release”，不会回退到作者服务。登录页和设置页均可手动检查。
 
-## 功能
+- “稍后再说”：本次不提示，下次冷启动仍检查。
+- “忽略此次更新”：保存此 Release 标签，更高版本仍会提示；手动检查可重新显示已忽略版本。
+- APK 交由系统下载管理器下载，完成后在应用内点击“安装更新”，由系统安装器处理，不跳转浏览器。
+- 使用 Gradle 默认 APK 名：优先 `app-release.apk`，兼容 `app-release-unsigned.apk`。未签名包需要正式签名后才能安装，建议发布签名的 `app-release.apk`。
+- 标签使用 `v1.19.4` 等数字版本。每次发布增加 `versionCode` 和 `versionName`，并保持自己的签名密钥一致；系统安装器检查签名，安装前额外核对包名与版本号。
+- 检查更新使用独立 HTTP 客户端，不携带学习通会话。更新状态保存在本地 DataStore。
 
-- 使用一台设备登录多账号来签到（通过扫码、链接等方式添加其他账号）
-- 随意指定当前的位置以完成位置签到
-- 从图库选择照片以完成拍照签到
-- 为自己和其他账号完成二维码签到 **（需要一台设备在现场扫码，理论上可为任意多的用户签到）**
-- 支持点击签到
-- 支持自动滑动有验证码的签到
-- 支持签到之后的发布的签退操作
-- 支持手势签到和签到码签到（暂不支持破解手势码和签到码）
-- 支持从群聊获取签到
-- 支持自动获取人脸照片完成人脸识别签到
-- 支持学习通的校园定制版的签到操作
+## 本地构建
 
-## 开发
+保留原有构建版本：JDK 21、Android SDK 37、Gradle Wrapper。用 Android Studio 打开本目录，或配置 Android SDK 路径后执行：
 
-- 详见[CONTRIBUTING.md](./CONTRIBUTING.md)
+```powershell
+.\gradlew.bat :app:assembleDebug :app:assembleRelease :app:lintRelease
+```
 
-## About Brainspark Project
+按本项目 `AGENTS.md` 的要求，不运行测试任务。
 
-- Brainspark 项目是 @aquamarine5 日常头脑风暴的一部分, Code Anything Possible。
+原作者签名文件已移除。Debug 使用本机调试签名。正式 Release 可以在 Android Studio 中签名，或配置以下环境变量：
 
-> [!TIP]
-> ChaoxingSignFaker（随地大小签） 使用 [Stackbricks](https://github.com/aquamarine5/Stackbricks) 来实现更新逻辑，同样由本作者维护。
+```text
+RELEASE_KEYSTORE_PATH
+RELEASE_KEYSTORE_PASSWORD
+RELEASE_KEY_ALIAS
+RELEASE_KEY_PASSWORD
+```
 
-<a href="https://www.star-history.com/?repos=aquamarine5%2FChaoxingSignFaker&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=aquamarine5/ChaoxingSignFaker&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=aquamarine5/ChaoxingSignFaker&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=aquamarine5/ChaoxingSignFaker&type=date&legend=top-left" />
- </picture>
-</a>
+未配置时，Release 输出默认的 `app/build/outputs/apk/release/app-release-unsigned.apk`；配置正式签名后输出 `app-release.apk`。私钥和密码不提交到仓库。
 
-![Recorded sign counts](analysis/signCount.svg)
+独立包名不能沿用原作者百度地图 Key 的包名/签名绑定。需要地图服务时，为本修改版申请百度 Android Key，通过 `BAIDU_MAPS_API_KEY` 环境变量提供，无需自建地图后端。未配置 Key 时，地图/定位功能尚不能验证为可用。
 
-![Analyser user counts](analysis/userCount.svg)
+支持 Android 8.0 及以上。独立包名不会读取原版的本机账号和照片。官方接口的实际可用性需要在自己的账号上验证。
 
-![Alt](https://repobeats.axiom.co/api/embed/629e66a936ab63b8d91a7dceb42437d55857900e.svg "Repobeats analytics image")
+## 署名与许可证
+
+原作者：aquamarine5（@海蓝色的咕咕鸽）及 Brainspark。修改者：rD227。原作者版权说明和 AGPL-3.0 许可证继续保留。
+
+[开发说明](CONTRIBUTING.md) · [许可证](LICENSE)

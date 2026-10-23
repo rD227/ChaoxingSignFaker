@@ -7,6 +7,7 @@
 package org.aquamarine5.brainspark.chaoxingsignfaker.signer
 
 import android.annotation.SuppressLint
+import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.md5
 import android.content.Context
 import android.util.Log
 import android.webkit.CookieManager
@@ -37,7 +38,6 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.signer.ChaoxingQRCodeSigner.
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.ChaoxingFaceSignException
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.ChaoxingParseDataException
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.ChaoxingUserSessionOutdatedException
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.UMengHelper
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.checkResponseThrowException
 import java.util.Locale
 import java.util.UUID
@@ -532,10 +532,10 @@ abstract class ChaoxingSigner(
     open suspend fun getCaptchaImageV2(): ChaoxingCaptchaDataEntity = withContext(Dispatchers.IO) {
         val t = getCaptchaConf()
         val type = "slide"
-        val captchaKey = UMengHelper.md5("$t${UUID.randomUUID()}")
+        val captchaKey = md5("$t${UUID.randomUUID()}")
         val iv =
-            UMengHelper.md5("${getCaptchaId()}$type${System.currentTimeMillis()}${UUID.randomUUID()}")
-        val token = UMengHelper.md5("$t${getCaptchaId()}$type$captchaKey") + ":${t + 300000L}"
+            md5("${getCaptchaId()}$type${System.currentTimeMillis()}${UUID.randomUUID()}")
+        val token = md5("$t${getCaptchaId()}$type$captchaKey") + ":${t + 300000L}"
         client.newCall(
             Request.Builder().get().url(
                 URL_CAPTCHA_IMAGE.newBuilder()

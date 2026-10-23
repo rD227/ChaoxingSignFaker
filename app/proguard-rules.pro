@@ -29,7 +29,6 @@
 -dontwarn com.baidu.**
 -dontnote com.baidu.location.**
 -dontwarn com.baidu.location.**
--keep class org.aquamarine5.brainspark.stackbricks.NoAvailableManifestException
 -keep class androidx.compose.runtime.LeftCompositionCancellationException
 -keep class androidx.compose.runtime.ForgottenCoroutineScopeException
 -keep class androidx.datastore.*.** {*;}
@@ -45,9 +44,6 @@
    void set*(...);
 }
 
--keep class com.umeng.** {*;}
--dontwarn com.umeng.**
--dontnote com.umeng.**
 
 -keep class org.repackage.** {*;}
 

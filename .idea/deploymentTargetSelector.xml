@@ -4,28 +4,6 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2026-04-07T09:36:21.727967200Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="Default" identifier="serial=192.168.137.166:33969;connection=971d8511" />
-            </handle>
-          </Target>
-        </DropdownSelection>
-        <DialogSelection />
-      </SelectionState>
-      <SelectionState runConfigName="PreviewSetting">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="androidTest">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DialogSelection />
-      </SelectionState>
-      <SelectionState runConfigName="main">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DialogSelection />
-      </SelectionState>
-      <SelectionState runConfigName="unitTest">
-        <option name="selectionMode" value="DROPDOWN" />
         <DialogSelection />
       </SelectionState>
     </selectionStates>

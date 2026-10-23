@@ -8,10 +8,10 @@ option java_multiple_files = true;
 // Repository: https://github.com/aquamarine5/ChaoxingSignFaker
 
 message ChaoxingSignFakerDataStore{
+  reserved 7, 20, 21, 22, 23, 24, 25, 27;
   repeated ChaoxingLocation locations = 1;
   ChaoxingLoginSession loginSession = 2;
   repeated ChaoxingOtherUserSession otherUsers = 4;
-  ChaoxingAnalysis analysis = 7;
   bool agreeTerms = 3;
   string deviceCode = 5 [deprecated = true];
   repeated uint32 preferCourse = 6 [deprecated = true];
@@ -21,24 +21,21 @@ message ChaoxingSignFakerDataStore{
   bool disableRecommend = 11 [deprecated = true];
   uint32 version = 12 [deprecated = true];
   repeated ChaoxingCourseClass preferCourseClass = 13 [deprecated = true];
-  bool bypassBlockedChecking = 14;
+  reserved 14;
   uint32 tagsIncreaseId = 16 [deprecated = true];
   repeated OtherUserTagType tagsLibrary = 15;
   LearntTooltip learntTooltips = 17;
   Preferences preferences = 18;
   map<string, ChaoxingFaceRecognitionConfigure> faceRecognitionConfigures = 19;
-  uint32 lastUploadAnalysisDate = 20;
-  string analysisUUID = 21;
-  string analysisRankName = 22;
-  bool disableAnalysisRank = 23;
-  bool hideAnalysisRankSchoolName = 24;
-  uint64 lastUploadAnalysisTimestamp = 25;
-  string selectedAnalysisRankSchoolName = 27;
   repeated ChaoxingLocation dontSaveNearbyPosition = 28;
   repeated string preferGroupId = 29;
   ChaoxingClassSchedule classSchedule = 30;
   map<uint32,ChaoxingLocation> classRememberedLocation=31;
   map<uint32,ChaoxingLocation> classSelectedLocation=32;
+  string ignoredReleaseTag = 33;
+  int64 updateDownloadId = 34;
+  string updateFilename = 35;
+  string localDeviceIdentity = 36;
 }
 
 message ChaoxingClassSchedule{
@@ -76,7 +73,7 @@ message Preferences{
   ChaoxingLocation lastSignedLocation = 3;
   string customizedUserAgent = 4;
   string customizedPackageName = 5;
-  uint32 displayRankCount = 6;
+  reserved 6;
   bool alwaysForceSign = 7;
   bool isIgnoreAllConsistentDeviceCodeComponents = 8;
   bool isAllowExternalProviderFetchInformation = 9;
@@ -108,15 +105,6 @@ message OtherUserTagType{
   uint64 color = 3;
 }
 
-message ChaoxingAnalysis{
-  uint32 locationSign = 1;
-  uint32 qrcodeSign = 2;
-  uint32 photoSign = 3;
-  uint32 clickSign = 4;
-  uint32 gestureSign = 5;
-  uint32 otherUserSign = 6;
-  uint32 passwordSign = 7;
-}
 
 message ChaoxingLocation{
   string address = 3;

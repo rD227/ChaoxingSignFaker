@@ -24,7 +24,7 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.requirePredictable
 
 class ChaoxingExternalCourseProvider : ContentProvider() {
     companion object {
-        const val AUTHORITY = "org.aquamarine5.brainspark.chaoxingsignfaker.coursesProvider"
+        const val AUTHORITY = "${BuildConfig.APPLICATION_ID}.coursesProvider"
         private const val METHOD_GET_COURSES = "getCourses"
         private const val KEY_JSON = "json"
         private const val KEY_ERROR = "error"

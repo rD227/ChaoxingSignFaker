@@ -24,7 +24,7 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.datastore.ChaoxingLoginSessi
 import org.aquamarine5.brainspark.chaoxingsignfaker.datastore.ChaoxingOtherUserSession
 import org.aquamarine5.brainspark.chaoxingsignfaker.datastore.ChaoxingSignFakerDataStore
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.chaoxingDataStore
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.sentryReport
+import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.logLocally
 
 open class ChaoxingHttpRequester internal constructor(
     val okHttpClient: OkHttpClient,
@@ -66,7 +66,7 @@ open class ChaoxingHttpRequester internal constructor(
             true
         }.getOrElse { throwable ->
             if (throwable is CancellationException) throw throwable
-            throwable.sentryReport()
+            throwable.logLocally()
             false
         }
     }

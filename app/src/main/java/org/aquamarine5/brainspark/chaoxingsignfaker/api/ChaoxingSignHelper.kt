@@ -39,7 +39,6 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.time.Duration.Companion.milliseconds
 
 object ChaoxingSignHelper {
-    val TIMEOUT_SHOW_SPONSOR_AFTER_ALL_SIGNED = 250.milliseconds
     private val signIconMap = mapOf(
         "0" to R.drawable.ic_square_mouse_pointer,
         "3" to R.drawable.ic_pattern_locking,

@@ -75,7 +75,6 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.components.NotReadyToSignNot
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.OtherUserSelectorComponent
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.SignOutRedirectTips
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.SignPotentialWarningTips
-import org.aquamarine5.brainspark.chaoxingsignfaker.components.SponsorPopupDialog
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.cloneSessionGuard
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.toChaoxingLocationSignEntity
 import org.aquamarine5.brainspark.chaoxingsignfaker.entity.ChaoxingLocationSignEntity
@@ -89,7 +88,6 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.signer.ChaoxingGestureSigner
 import org.aquamarine5.brainspark.chaoxingsignfaker.signer.ChaoxingSignHandler
 import org.aquamarine5.brainspark.chaoxingsignfaker.signer.ChaoxingSigner
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.LocalSnackbarHostState
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.UMengHelper
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.chaoxingDataStore
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.displaySnackbar
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.saveSelectedLocation
@@ -149,10 +147,8 @@ fun GestureSignScreen(
             destination
         )
     }
-    var isSponsor by remember { mutableStateOf(false) }
-    if (isSponsor) {
-        SponsorPopupDialog()
-    }
+
+
     var captchaValidateParams by remember {
         mutableStateOf<CaptchaHandlerParams<ChaoxingGestureSigner>>(
             null
@@ -519,9 +515,6 @@ fun GestureSignScreen(
                                 }
                             },
                             onSigningFinished = { _, name, isOtherUser ->
-                                coroutineScope.launch {
-                                    UMengHelper.onSignGestureEvent(context, name, isOtherUser)
-                                }
                                 locationData?.saveSelectedLocation(
                                     context, destination.classId, coroutineScope
                                 ) {
@@ -529,12 +522,6 @@ fun GestureSignScreen(
                                 }
                             }, onAllSigningFinished = { isSuccessful ->
                                 isSigning.value = false
-                                if (isSuccessful) {
-                                    coroutineScope.launch {
-                                        delay(ChaoxingSignHelper.TIMEOUT_SHOW_SPONSOR_AFTER_ALL_SIGNED)
-                                        isSponsor = true
-                                    }
-                                }
                             }, destination = destination
                         )
                     }

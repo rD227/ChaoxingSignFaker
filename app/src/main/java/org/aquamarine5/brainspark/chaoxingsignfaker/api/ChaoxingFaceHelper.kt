@@ -22,7 +22,7 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.StoredData
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.chaoxingDataStore
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.checkResponseThrowException
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.checkThrowFaceException
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.sentryReport
+import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.logLocally
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.storedData
 import java.io.File
 import java.security.MessageDigest
@@ -104,7 +104,7 @@ object ChaoxingFaceHelper {
                         addSignToken(clientId, fields, cxtime)
                     }
                 }.onFailure {
-                    it.sentryReport()
+                    it.logLocally()
                 }
             }
     }

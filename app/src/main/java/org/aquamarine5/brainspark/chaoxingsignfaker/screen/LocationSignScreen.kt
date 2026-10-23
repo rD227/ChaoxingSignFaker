@@ -67,7 +67,6 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.components.SaveFaceImagesDia
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.SaveFavoriteLocationDialog
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.SignOutRedirectTips
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.SignPotentialWarningTips
-import org.aquamarine5.brainspark.chaoxingsignfaker.components.SponsorPopupDialog
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.cloneSessionGuard
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.toChaoxingLocation
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.toChaoxingLocationSignEntity
@@ -86,7 +85,6 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.signer.ChaoxingSigner
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.ChaoxingPredictableException
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.FaceRecognitionImageStatus
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.LocalSnackbarHostState
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.UMengHelper
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.chaoxingDataStore
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.rememberFaceRecognitionData
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.saveSelectedLocation
@@ -145,10 +143,8 @@ fun LocationSignScreen(
             destination
         )
     }
-    var isSponsor by remember { mutableStateOf(false) }
-    if (isSponsor) {
-        SponsorPopupDialog()
-    }
+
+
     var captchaValidateParams by remember {
         mutableStateOf<CaptchaHandlerParams<ChaoxingLocationSigner>>(
             null
@@ -280,7 +276,7 @@ fun LocationSignScreen(
                     val userSelections = remember { mutableStateListOf(isSignForOther.not()) }
                     var isFaceImageCaptured by remember { mutableStateOf(false) }
                     var showFaceSaveDialog by remember { mutableStateOf(false) }
-                    var sponsorPendingAfterFaceSave by remember { mutableStateOf(false) }
+
                     var signedLocation by remember {
                         mutableStateOf<ChaoxingLocationSignEntity?>(
                             null
@@ -302,13 +298,7 @@ fun LocationSignScreen(
                             faceRecognitionData,
                             otherUserSessionForSignList
                         ) {
-                            if (sponsorPendingAfterFaceSave) {
-                                coroutineScope.launch {
-                                    delay(ChaoxingSignHelper.TIMEOUT_SHOW_SPONSOR_AFTER_ALL_SIGNED)
-                                    isSponsor = true
-                                    sponsorPendingAfterFaceSave = false
-                                }
-                            }
+
                             showFaceSaveDialog = false
                         }
                     }
@@ -456,14 +446,6 @@ fun LocationSignScreen(
                             },
                             destination = destination,
                             onSigningFinished = { value, name, isOtherUser ->
-                                coroutineScope.launch {
-                                    UMengHelper.onSignLocationEvent(
-                                        context,
-                                        value,
-                                        name,
-                                        isOtherUser
-                                    )
-                                }
                                 value.saveSelectedLocation(
                                     context, destination.classId, coroutineScope
                                 ) {
@@ -516,13 +498,8 @@ fun LocationSignScreen(
                                         }
                                     }
                                     if (faceRecognitionData.newImagePhones.isNotEmpty()) {
-                                        sponsorPendingAfterFaceSave = true
+
                                         showFaceSaveDialog = true
-                                    } else {
-                                        coroutineScope.launch {
-                                            delay(ChaoxingSignHelper.TIMEOUT_SHOW_SPONSOR_AFTER_ALL_SIGNED)
-                                            isSponsor = true
-                                        }
                                     }
                                 }
                             },

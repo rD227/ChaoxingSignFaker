@@ -15,10 +15,7 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Base64
 import com.alibaba.fastjson2.JSONObject
-import com.umeng.commonsdk.UMConfigure
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withTimeout
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.chaoxingApplicationPackageName
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.chaoxingDataStore
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.requirePredictable
@@ -32,15 +29,12 @@ import java.util.Locale
 import java.util.UUID
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
-import kotlin.coroutines.resume
-import kotlin.time.Duration.Companion.seconds
 
 object ChaoxingDeviceInfoHelper {
     private const val DEVICE_INFO_PUBLIC_KEY =
         "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC79d8Ot0hCbxxSISC6x8SCwTBspFSzlLKHJUYqoFNu1TSRaw4hEYkOnvEaL1VyoxV6HXcDrzwYvaFZaZaPQPFnfCHZy5dQwxcmifgSHqS+oKXw40Ys4cVIqnU5d90S7EWSRdBglX489jlqVaNcQSkDx2TYmC+DbAq9FV/BU09ISQIDAQAB"
     private const val RSA_PLAIN_BLOCK_SIZE = 117
     private const val DEVICE_FLAG_INFO_KEY = "QrCbNY@MuK1X8HGw"
-    private val INVALID_UNIQUE_ID_REGEX = Regex("^0{16,64}$")
 
     fun buildEncryptedDeviceInfo(context: Context): String =
         encryptByRsa(buildDeviceInfo(context).toJSONString().toByteArray(Charsets.UTF_8))
@@ -113,26 +107,11 @@ object ChaoxingDeviceInfoHelper {
         return Base64.encodeToString(rawData + rawData, Base64.NO_WRAP)
     }
 
-    private suspend fun getLocalMachineUniqueId(context: Context): String {
-        val uniqueId = runCatching {
-            withTimeout(1.seconds) {
-                suspendCancellableCoroutine { continuation ->
-                    UMConfigure.getOaid(context.applicationContext) { deviceId ->
-                        if (continuation.isActive) continuation.resume(deviceId.orEmpty())
-                    }
-                }
-            }
-        }.getOrElse {
-            return ""
-        }
-        return if (uniqueId.isNotBlank() &&
-            !INVALID_UNIQUE_ID_REGEX.matches(uniqueId.replace("-", ""))
-        ) {
-            uniqueId
-        } else {
-            ""
-        }
-    }
+    private suspend fun getLocalMachineUniqueId(context: Context): String =
+        context.chaoxingDataStore.updateData { data ->
+            if (data.localDeviceIdentity.isNotEmpty()) data
+            else data.toBuilder().setLocalDeviceIdentity(UUID.randomUUID().toString()).build()
+        }.localDeviceIdentity
 
     @SuppressLint("HardwareIds")
     private fun buildDeviceInfo(context: Context): JSONObject {
@@ -218,12 +197,20 @@ object ChaoxingDeviceInfoHelper {
     private fun getMediaDrmId(): String =
         runCatching {
             val widevineUuid = UUID(-0x121074568629b532L, -0x5c37d8232ae2de13L)
-            MediaDrm(widevineUuid).use { mediaDrm ->
+            val mediaDrm = MediaDrm(widevineUuid)
+            val result = runCatching {
                 Base64.encodeToString(
                     mediaDrm.getPropertyByteArray(MediaDrm.PROPERTY_DEVICE_UNIQUE_ID),
                     Base64.NO_WRAP
                 )
             }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                mediaDrm.close()
+            } else {
+                @Suppress("DEPRECATION")
+                mediaDrm.release()
+            }
+            result.getOrThrow()
         }.getOrDefault("")
 
     private fun getSignatureDigest(packageInfo: PackageInfo): String {

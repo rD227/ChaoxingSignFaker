@@ -102,7 +102,6 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.components.QRCodeScanCompone
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.SaveFaceImagesDialog
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.SignOutRedirectTips
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.SignPotentialWarningTips
-import org.aquamarine5.brainspark.chaoxingsignfaker.components.SponsorPopupDialog
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.cloneSessionGuard
 import org.aquamarine5.brainspark.chaoxingsignfaker.components.toChaoxingLocationSignEntity
 import org.aquamarine5.brainspark.chaoxingsignfaker.datastore.ChaoxingOtherUserSession
@@ -121,14 +120,13 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.ChaoxingPredictabl
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.FaceRecognitionImageStatus
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.LocalImageLoader
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.LocalSnackbarHostState
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.UMengHelper
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.chaoxingDataStore
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.displaySnackbar
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.isDevelopedMode
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.rememberFaceRecognitionData
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.requirePredictable
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.saveSelectedLocation
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.sentryReport
+import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.logLocally
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.snackbarReport
 import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.seconds
@@ -341,25 +339,16 @@ fun QRCodeSignScreen(
                     val signStatus =
                         remember { mutableStateListOf(ChaoxingSignStatus(hapticFeedback)) }
 
-                    var isSponsor by remember { mutableStateOf(false) }
-                    if (isSponsor) {
-                        SponsorPopupDialog()
-                    }
+
                     var isFaceImageCaptured by remember { mutableStateOf(false) }
                     var showFaceSaveDialog by remember { mutableStateOf(false) }
-                    var sponsorPendingAfterFaceSave by remember { mutableStateOf(false) }
+
                     if (showFaceSaveDialog) {
                         SaveFaceImagesDialog(
                             faceRecognitionData,
                             signUserList
                         ) {
-                            if (sponsorPendingAfterFaceSave) {
-                                coroutineScope.launch {
-                                    delay(ChaoxingSignHelper.TIMEOUT_SHOW_SPONSOR_AFTER_ALL_SIGNED)
-                                    isSponsor = true
-                                    sponsorPendingAfterFaceSave = false
-                                }
-                            }
+
                             showFaceSaveDialog = false
                         }
                     }
@@ -439,13 +428,6 @@ fun QRCodeSignScreen(
                                 }
                             },
                             onSigningFinished = { _, name, isOtherUser ->
-                                coroutineScope.launch {
-                                    UMengHelper.onSignQRCodeEvent(
-                                        context,
-                                        name,
-                                        isOtherUser
-                                    )
-                                }
                                 locationData?.saveSelectedLocation(
                                     context, destination.classId, coroutineScope
                                 ) {
@@ -553,11 +535,8 @@ fun QRCodeSignScreen(
                                 }
                                 if (isSuccessful) {
                                     if (faceRecognitionData.newImagePhones.isNotEmpty()) {
-                                        sponsorPendingAfterFaceSave = true
+
                                         showFaceSaveDialog = true
-                                    } else coroutineScope.launch {
-                                        delay(ChaoxingSignHelper.TIMEOUT_SHOW_SPONSOR_AFTER_ALL_SIGNED)
-                                        isSponsor = true
                                     }
                                 }
                             },
@@ -1103,7 +1082,7 @@ fun QRCodeSignScreen(
                                                     "ChaoxingQRCodeSigner",
                                                     exception.rawValue
                                                 )
-                                            } ?: it.sentryReport()
+                                            } ?: it.logLocally()
                                             isQRCodeIllegal = true
                                             qrcodeIllegalText =
                                                 it.message ?: "二维码解析失败，不是正确码。"
@@ -1183,7 +1162,7 @@ fun QRCodeSignScreen(
                                         it.printStackTrace()
                                         (it as? ChaoxingQRCodeSigner.QRCodeParseException).let { exception ->
                                             if (exception == null)
-                                                it.sentryReport()
+                                                it.logLocally()
                                             else {
                                                 if (isDevelopedMode)
                                                     snackbarHost.displaySnackbar(

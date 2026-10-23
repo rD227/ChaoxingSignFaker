@@ -24,7 +24,7 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.entity.RecommendActivityEnti
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.ChaoxingParseDataException
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.checkResponseThrowException
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.requirePredictable
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.sentryReport
+import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.logLocally
 import kotlin.time.Duration.Companion.minutes
 
 object ChaoxingActivityHelper {
@@ -106,7 +106,7 @@ object ChaoxingActivityHelper {
         if (failures.size == results.size) {
             failures.first().getOrThrow()
         }
-        failures.forEach { it.exceptionOrNull()?.sentryReport() }
+        failures.forEach { it.exceptionOrNull()?.logLocally() }
         if (failures.isNotEmpty()) {
             onPartialFailure(failures.size)
         }

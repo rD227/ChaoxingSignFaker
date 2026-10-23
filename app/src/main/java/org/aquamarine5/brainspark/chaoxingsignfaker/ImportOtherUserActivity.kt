@@ -41,39 +41,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.umeng.analytics.MobclickAgent
 import org.aquamarine5.brainspark.chaoxingsignfaker.api.ChaoxingOtherUserHelper
 import org.aquamarine5.brainspark.chaoxingsignfaker.entity.ChaoxingImportOtherUserResultStatus
 import org.aquamarine5.brainspark.chaoxingsignfaker.entity.ChaoxingOtherUserSharedEntity
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.ChaoxingPredictableException
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.UMengHelper
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.toastReport
 import kotlin.system.exitProcess
 
 class ImportOtherUserActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val versionData = packageManager.getPackageInfo(
-            packageName,
-            GET_META_DATA
-        )
-        if (UMengHelper.md5(
-                packageManager.getApplicationLabel(
-                    versionData.applicationInfo!!
-                ).toString()
-            ) != "181b23fb3bfa29181fcde41f72757e97" && UMengHelper.md5(
-                packageName
-            ) != "717670698be98532464cfc122894908b"
-        ) {
-            UMengHelper.onIllegalChannelEvent(
-                this,
-                versionData
-            )
-            MobclickAgent.onKillProcess(this)
-            Process.killProcess(Process.myPid())
-            exitProcess(0)
-            throw ChaoxingPredictableException.ApplicationIllegalChannelException()
-        }
         setContent {
             Scaffold { innerPadding ->
                 Column(
@@ -140,14 +117,6 @@ class ImportOtherUserActivity : ComponentActivity() {
                                             }.onSuccess { result ->
                                                 isSuccess = true
                                                 isLoading = false
-                                                if (result.first == ChaoxingImportOtherUserResultStatus.SUCCESS) {
-                                                    result.third.let {
-                                                        UMengHelper.onAccountOtherUserAddEvent(
-                                                            applicationContext,
-                                                            it
-                                                        )
-                                                    }
-                                                }
                                             }.onFailure { failure ->
                                                 errorTips =
                                                     failure.message ?: failure.localizedMessage

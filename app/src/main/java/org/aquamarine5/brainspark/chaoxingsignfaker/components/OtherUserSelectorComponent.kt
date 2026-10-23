@@ -129,7 +129,7 @@ import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.chaoxingDataStore
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.displaySnackbar
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.getThisOrCauseNetworkExceptionMessage
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.isDevelopedMode
-import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.sentryReport
+import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.logLocally
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.snackbarReport
 import java.io.File
 import kotlin.math.abs
@@ -324,7 +324,7 @@ fun OtherUserSelectorComponent(
                                     }
                                 }.onFailure {
                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.Reject)
-                                    it.sentryReport()
+                                    it.logLocally()
                                     errorMessage = "登录失败：" +
                                             (it.getThisOrCauseNetworkExceptionMessage()
                                                 ?: it.message

@@ -6,17 +6,7 @@
 
 pluginManagement {
     repositories {
-        maven {
-            url ="https://maven.pkg.github.com/aquamarine5/stackbricks-gradle-plugin"
-            credentials {
-                username = "aquamarine5"
-                password = System.getenv("GHP_TOKEN")
-            }
-            content{
-                includeGroup("org.aquamarine5.brainspark")
-                includeGroup("org.aquamarine5.brainspark.stackbricks-gradle-plugin")
-            }
-        }
+
         google {
             content {
                 includeGroupByRegex("com\\.android.*")
@@ -34,16 +24,7 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        maven {
-            url ="https://maven.pkg.github.com/aquamarine5/Stackbricks"
-            credentials {
-                username = "aquamarine5"
-                password = System.getenv("GHP_TOKEN")
-            }
-            content{
-                includeModule("org.aquamarine5.brainspark","stackbricks")
-            }
-        }
+
         google()
 
         maven {

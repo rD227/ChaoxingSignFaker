@@ -6,11 +6,11 @@
 
 package org.aquamarine5.brainspark.chaoxingsignfaker.api
 
+import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.logLocally
 import android.content.Context
 import android.widget.Toast
 import com.alibaba.fastjson2.JSONArray
 import com.alibaba.fastjson2.JSONObject
-import io.sentry.Sentry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -135,13 +135,11 @@ object ChaoxingCourseHelper {
                     )
                 )
             }.getOrElse {
-                Sentry.captureException(
-                    ChaoxingParseDataException(
+                ChaoxingParseDataException(
                         "课程数据解析失败: ${it.message}",
                         it,
                         course.toJSONString()
-                    )
-                )
+                ).logLocally()
             }
         }
     }

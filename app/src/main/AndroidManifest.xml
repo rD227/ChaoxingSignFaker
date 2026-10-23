@@ -11,6 +11,8 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
@@ -20,10 +22,10 @@
     <uses-feature android:name="android.hardware.camera" />
 
     <permission
-        android:name="org.aquamarine5.brainspark.chaoxingsignfaker.permission.QUERY_CHAOXING_INFORMATION"
+        android:name="${applicationId}.permission.QUERY_CHAOXING_INFORMATION"
         android:protectionLevel="normal" />
 
-    <uses-permission android:name="org.aquamarine5.brainspark.chaoxingsignfaker.permission.QUERY_CHAOXING_INFORMATION" />
+    <uses-permission android:name="${applicationId}.permission.QUERY_CHAOXING_INFORMATION" />
 
     <queries>
         <package android:name="com.netease.cloudmusic" />
@@ -55,21 +57,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
 
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="um.67d42c1c48ac1b4f87e7edae" />
-            </intent-filter>
             <intent-filter>
-                <action android:name="org.aquamarine5.brainspark.chaoxingsignfaker.action.OPEN_SIGN" />
+                <action android:name="${applicationId}.action.OPEN_SIGN" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter>
-                <action android:name="org.aquamarine5.brainspark.chaoxingsignfaker.action.OPEN_SETTING_TO_ALLOW_EXTERNAL_QUERY_PERMISSION" />
+                <action android:name="${applicationId}.action.OPEN_SETTING_TO_ALLOW_EXTERNAL_QUERY_PERMISSION" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -87,7 +82,7 @@
 
                 <data
                     android:host="import"
-                    android:scheme="cxsignfaker" />
+                    android:scheme="rd227cxsignfaker" />
             </intent-filter>
         </activity>
 
@@ -98,42 +93,14 @@
 
         <provider
             android:name=".ChaoxingExternalCourseProvider"
-            android:authorities="org.aquamarine5.brainspark.chaoxingsignfaker.coursesProvider"
+            android:authorities="${applicationId}.coursesProvider"
             android:exported="true"
-            android:permission="org.aquamarine5.brainspark.chaoxingsignfaker.permission.QUERY_CHAOXING_INFORMATION" />
+            android:permission="${applicationId}.permission.QUERY_CHAOXING_INFORMATION" />
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="vPf3wCC9gDszB86rRqrXxo2BYRoTM2DR" />
+            android:value="${BAIDU_MAPS_API_KEY}" />
 
-        <meta-data
-            android:name="io.sentry.dsn"
-            android:value="https://8fc14f446faf3ed51b16aafb0fa11799@o4505418205364224.ingest.us.sentry.io/4508976320020480" />
-
-        <meta-data
-            android:name="io.sentry.send-default-pii"
-            android:value="true" />
-        <meta-data
-            android:name="io.sentry.traces.user-interaction.enable"
-            android:value="false" />
-        <meta-data
-            android:name="io.sentry.attach-screenshot"
-            android:value="true" />
-        <meta-data
-            android:name="io.sentry.attach-view-hierarchy"
-            android:value="true" />
-        <meta-data
-            android:name="io.sentry.traces.sample-rate"
-            android:value="0.0" />
-        <meta-data
-            android:name="io.sentry.traces.profiling.sample-rate"
-            android:value="0.0" />
-        <meta-data
-            android:name="io.sentry.traces.profiling.enable-app-start"
-            android:value="false" />
-        <meta-data
-            android:name="io.sentry.tombstone.enable"
-            android:value="true" />
     </application>
 
 </manifest>
