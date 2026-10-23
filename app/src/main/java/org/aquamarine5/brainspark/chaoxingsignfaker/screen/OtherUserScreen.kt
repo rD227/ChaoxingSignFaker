@@ -2066,7 +2066,7 @@ fun OtherUserScreen(
             )
         }, text = { dialogSnackbarHost ->
             Column {
-                Text("对方将链接从浏览器打开即可导入你的用户数据（对方需更新到1.5版本及以上），或将链接粘贴到以下输入框中：")
+                Text("支持原版与本版扫码或粘贴链接导入。浏览器打开会访问原作者网站并尝试唤起应用；若被浏览器、微信或 QQ 拦截，请复制链接到以下输入框导入：")
                 Spacer(modifier = Modifier.height(6.dp))
                 OutlinedTextField(inputUrl, onValueChange = {
                     inputUrl = it
@@ -2093,7 +2093,7 @@ fun OtherUserScreen(
                     FilledTonalButton(onClick = {
                         if (inputUrl.isNotBlank()) {
                             val url =
-                                Regex("""(?:https?|rd227cxsignfaker)://[^\s，。、]+""").find(inputUrl)?.value?.toUri()
+                                Regex("""(?:https?|rd227cxsignfaker|cxsignfaker)://[^\s，。、]+""").find(inputUrl)?.value?.toUri()
                             if (url == null) {
                                 hapticFeedback.performHapticFeedback(HapticFeedbackType.Reject)
                                 Toast.makeText(context, "链接格式错误", Toast.LENGTH_SHORT).show()

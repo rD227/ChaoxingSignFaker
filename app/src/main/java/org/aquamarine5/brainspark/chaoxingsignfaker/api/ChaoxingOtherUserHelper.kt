@@ -100,7 +100,7 @@ object ChaoxingOtherUserHelper {
                 .distinct()
                 .filter { it in availableFaceObjectIds }.take(ChaoxingFaceHelper.MAX_FACE_IMAGES)
             val deviceCode = ChaoxingDeviceInfoHelper.getCachedLocalMachineDeviceCode(context)
-            "rd227cxsignfaker://import?phone=${sharedEntity.phoneNumber}&pwd=${
+            "http://cdn.aquamarine5.fun/?phone=${Uri.encode(sharedEntity.phoneNumber)}&pwd=${
                 Uri.encode(sharedEntity.encryptedPassword)
             }&name=${
                 Uri.encode(sharedEntity.userName)

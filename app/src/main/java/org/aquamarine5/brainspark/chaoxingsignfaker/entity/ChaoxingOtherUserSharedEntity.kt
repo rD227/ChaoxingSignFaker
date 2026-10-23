@@ -26,7 +26,7 @@ data class ChaoxingOtherUserSharedEntity(
                 val raw = qrcode.rawValue ?: qrcode.url?.url
                 checkPredictable(!raw.isNullOrBlank()) { "二维码不是一个有效的链接" }
                 val url = raw.toUri()
-                checkPredictable(url.scheme == "rd227cxsignfaker" && url.host == "import" ||
+                checkPredictable(url.scheme in listOf("rd227cxsignfaker", "cxsignfaker") && url.host == "import" ||
                     url.scheme in listOf("http", "https") && url.host == "cdn.aquamarine5.fun") {
                     "二维码不是一个有效的用户分享链接"
                 }
