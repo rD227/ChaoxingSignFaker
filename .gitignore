@@ -16,6 +16,7 @@ local.properties
 .sentryclirc
 
 app/build
+/app/debug
 /app/release
 /.kotlin
 .idea/copilotDiffState.xml
@@ -25,3 +26,5 @@ analysis/IM_NOTIFICATION_RESEARCH.md
 
 *.jks
 *.keystore
+*.apk
+*.aab
