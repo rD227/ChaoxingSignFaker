@@ -92,6 +92,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.aquamarine5.brainspark.chaoxingsignfaker.BuildConfig
 import org.aquamarine5.brainspark.chaoxingsignfaker.R
 import org.aquamarine5.brainspark.chaoxingsignfaker.datastore.ChaoxingLocation
 import org.aquamarine5.brainspark.chaoxingsignfaker.entity.ChaoxingLocationDetailEntity
@@ -118,6 +119,11 @@ fun GetLocationComponent(
     confirmButtonText: @Composable () -> Unit,
     onLocationResult: (ChaoxingLocationSignEntity) -> Unit
 ) {
+    if (!BuildConfig.IS_BAIDU_MAP_CONFIGURED) {
+        Text("此安装包尚未配置地图服务，地图和自动定位暂不可用，请联系维护者提供已配置的版本。",
+            modifier = Modifier.padding(16.dp))
+        return
+    }
     val hapticFeedback = LocalHapticFeedback.current
     val snackbarHost = LocalSnackbarHostState.current
     val context = LocalContext.current
@@ -138,8 +144,7 @@ fun GetLocationComponent(
             )
         )
         if (locationPermissionsState.allPermissionsGranted) {
-            val isInitialized = remember { SDKInitializer.isInitialized() }
-            if (!isInitialized) {
+            if (!SDKInitializer.isInitialized()) {
                 SDKInitializer.initialize(context.applicationContext)
             }
             val locationClient = remember {

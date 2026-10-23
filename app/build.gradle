@@ -30,6 +30,8 @@ versionNameParts[-1] = (versionNameParts[-1].toBigInteger() + 1).toString()
 def nextVersionName = versionNameParts.join('.')
 def applicationProjectPath = project.path
 def artifactBuildTask = ~/^(assemble|bundle|package|install)(Debug|Release)(Bundle|Apk)?$/
+def baiduMapsApiKey = providers.gradleProperty('BAIDU_MAPS_API_KEY')
+        .orElse(providers.environmentVariable('BAIDU_MAPS_API_KEY')).getOrElse('').trim()
 
 gradle.taskGraph.whenReady { graph ->
     def isArtifactBuild = graph.allTasks.any { task ->
@@ -55,7 +57,8 @@ android {
         applicationId = "io.github.rd227.chaoxingsignfaker"
         minSdk = 26
         targetSdk = 37
-        manifestPlaceholders["BAIDU_MAPS_API_KEY"] = providers.environmentVariable("BAIDU_MAPS_API_KEY").getOrElse("")
+        manifestPlaceholders["BAIDU_MAPS_API_KEY"] = baiduMapsApiKey
+        buildConfigField 'boolean', 'IS_BAIDU_MAP_CONFIGURED', (!baiduMapsApiKey.isEmpty()).toString()
         versionCode = currentVersionCode
         versionName = storedVersionName
 

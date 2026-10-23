@@ -74,6 +74,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import org.aquamarine5.brainspark.chaoxingsignfaker.BuildConfig
 import org.aquamarine5.brainspark.chaoxingsignfaker.R
 import org.aquamarine5.brainspark.chaoxingsignfaker.datastore.ChaoxingLocation
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.LocalSnackbarHostState
@@ -94,6 +95,11 @@ object FavoriteLocationSettingDestination
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun FavoriteLocationSettingComponent(modifier: Modifier = Modifier) {
+    if (!BuildConfig.IS_BAIDU_MAP_CONFIGURED) {
+        Text("此安装包尚未配置地图服务，地图和自动定位暂不可用，请联系维护者提供已配置的版本。",
+            modifier = modifier.padding(16.dp))
+        return
+    }
     val hapticFeedback = LocalHapticFeedback.current
     val snackbarHost = LocalSnackbarHostState.current
     val context = LocalContext.current
@@ -113,35 +119,34 @@ fun FavoriteLocationSettingComponent(modifier: Modifier = Modifier) {
     var clickedPosition by remember { mutableStateOf(LatLng(0.0, 0.0)) }
     var clickedName by remember { mutableStateOf("未指定") }
     var clickedLabel by remember { mutableStateOf<String?>(null) }
-    val geoCoder = remember {
-        GeoCoder.newInstance().apply {
-            setOnGetGeoCodeResultListener(object : OnGetGeoCoderResultListener {
-                override fun onGetGeoCodeResult(p0: GeoCodeResult?) {}
-
-                override fun onGetReverseGeoCodeResult(p0: ReverseGeoCodeResult?) {
-                    if (p0 == null || p0.error != SearchResult.ERRORNO.NO_ERROR) {
-                        Log.w(
-                            "GetLocationPage",
-                            "ReverseGeoCodeResult error: ${p0?.error}"
-                        )
-                        return
-                    }
-                    if (isNeedLocationDescribe) {
-                        clickedName = p0.address
-                        isNeedLocationDescribe = false
-                    } else {
-                        clickedName = p0.address
-                        clickedLabel = p0.poiList?.firstOrNull()?.name?.takeIf { it.isNotBlank() }
-                            ?: "自定义位置"
-                    }
-                }
-            })
-        }
-    }
     if (locationPermissionsState.allPermissionsGranted) {
-        val isInitialized = remember { SDKInitializer.isInitialized() }
-        if (!isInitialized) {
+        if (!SDKInitializer.isInitialized()) {
             SDKInitializer.initialize(context.applicationContext)
+        }
+        val geoCoder = remember {
+            GeoCoder.newInstance().apply {
+                setOnGetGeoCodeResultListener(object : OnGetGeoCoderResultListener {
+                    override fun onGetGeoCodeResult(p0: GeoCodeResult?) {}
+
+                    override fun onGetReverseGeoCodeResult(p0: ReverseGeoCodeResult?) {
+                        if (p0 == null || p0.error != SearchResult.ERRORNO.NO_ERROR) {
+                            Log.w(
+                                "GetLocationPage",
+                                "ReverseGeoCodeResult error: ${p0?.error}"
+                            )
+                            return
+                        }
+                        if (isNeedLocationDescribe) {
+                            clickedName = p0.address
+                            isNeedLocationDescribe = false
+                        } else {
+                            clickedName = p0.address
+                            clickedLabel = p0.poiList?.firstOrNull()?.name?.takeIf { it.isNotBlank() }
+                                ?: "自定义位置"
+                        }
+                    }
+                })
+            }
         }
         val locationClient = remember {
             LocationClient(context).apply {

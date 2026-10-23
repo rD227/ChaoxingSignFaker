@@ -59,7 +59,11 @@ RELEASE_KEY_PASSWORD
 
 未配置时，Release 输出默认的 `app/build/outputs/apk/release/app-release-unsigned.apk`；配置正式签名后输出 `app-release.apk`。私钥和密码不提交到仓库。
 
-独立包名不能沿用原作者百度地图 Key 的包名/签名绑定。需要地图服务时，为本修改版申请百度 Android Key，通过 `BAIDU_MAPS_API_KEY` 环境变量提供，无需自建地图后端。未配置 Key 时，地图/定位功能尚不能验证为可用。
+独立包名不能沿用原作者百度地图 Key 的包名/签名绑定。继续使用百度官方地图与定位 SDK，需要在[百度地图开放平台](https://lbsyun.baidu.com/docs/guide?title=android-guide%2Fprepare)为本修改版申请 Android SDK AK，并勾选需要的地图、定位和检索服务，无需自建后端。官方说明非商业用途提供免费服务与配额，商用及超额服务按平台规则处理。
+
+申请时填写包名 `io.github.rd227.chaoxingsignfaker`。当前 `new.jks / key0` 正式签名的 SHA1 是 `57:49:D4:40:FE:63:48:D4:C5:B3:6D:22:37:C3:E3:84:F5:0A:50:94`，Debug 签名需另外登记。签名变更后应重新核对，不可混用原作者的包名或签名信息。
+
+通过 `BAIDU_MAPS_API_KEY` 环境变量，或 Gradle 属性 `BAIDU_MAPS_API_KEY` 注入 AK；属性优先。Android Studio 本机构建可以把 `BAIDU_MAPS_API_KEY=你的AK` 写入用户目录下的 `.gradle/gradle.properties`，不提交到仓库。GitHub Actions 已预留同名 Secret。没有配置 AK 的安装包会明确提示地图服务未配置，不再初始化空 Key 的地图和定位；配置了 AK 仍需验证平台服务权限、包名及签名是否匹配。
 
 支持 Android 8.0 及以上。独立包名不会读取原版的本机账号和照片。官方接口的实际可用性需要在自己的账号上验证。
 
