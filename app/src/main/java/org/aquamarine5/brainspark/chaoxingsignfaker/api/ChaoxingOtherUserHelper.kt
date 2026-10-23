@@ -99,7 +99,18 @@ object ChaoxingOtherUserHelper {
             val faceObjectIds = selectedFaceObjectIds
                 .distinct()
                 .filter { it in availableFaceObjectIds }.take(ChaoxingFaceHelper.MAX_FACE_IMAGES)
-            val deviceCode = ChaoxingDeviceInfoHelper.getCachedLocalMachineDeviceCode(context)
+            val deviceCode = if (sharedEntity.phoneNumber == dataStore.loginSession.phoneNumber) {
+                ChaoxingDeviceInfoHelper.getCachedLocalMachineDeviceCode(context)
+            } else {
+                val session = dataStore.otherUsersList.firstOrNull {
+                    it.phoneNumber == sharedEntity.phoneNumber
+                }
+                if (session != null) {
+                    session.deviceCode.takeIf { session.isNotRandomizedDeviceCode }.orEmpty()
+                } else {
+                    sharedEntity.deviceCode.orEmpty()
+                }
+            }
             "http://cdn.aquamarine5.fun/?phone=${Uri.encode(sharedEntity.phoneNumber)}&pwd=${
                 Uri.encode(sharedEntity.encryptedPassword)
             }&name=${
