@@ -1,19 +1,12 @@
 package org.aquamarine5.brainspark.chaoxingsignfaker
 
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
-import android.content.Context
+import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.IntentFilter
-import android.os.Environment
-import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.core.content.ContextCompat
-import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.CancellationException
@@ -27,11 +20,10 @@ import org.json.JSONObject
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.chaoxingDataStore
 import org.aquamarine5.brainspark.chaoxingsignfaker.utilities.checkPredictable
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.math.BigInteger
 import java.util.concurrent.TimeUnit
 
-data class GitHubRelease(val tag: String, val notes: String, val url: String, val assetId: Long)
+data class GitHubRelease(val tag: String, val notes: String, val url: String)
 
 class GitHubUpdateManager(private val activity: ComponentActivity) {
     var status by mutableStateOf("当前版本 ${BuildConfig.VERSION_NAME}")
@@ -42,37 +34,8 @@ class GitHubUpdateManager(private val activity: ComponentActivity) {
         private set
     var isChecking by mutableStateOf(false)
         private set
-    var isDownloaded by mutableStateOf(false)
-        private set
-    var isDownloading by mutableStateOf(false)
-        private set
-    private val downloads = activity.getSystemService(DownloadManager::class.java)
     private val client = OkHttpClient.Builder().connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS).callTimeout(25, TimeUnit.SECONDS).build()
-    private val permissionLauncher = activity.registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { if (activity.packageManager.canRequestPackageInstalls()) install() }
-    private val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            activity.lifecycleScope.launch {
-                val data = activity.chaoxingDataStore.data.first()
-                if (intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1) == data.updateDownloadId) {
-                    refreshDownload()
-                }
-            }
-        }
-    }
-
-    init {
-        ContextCompat.registerReceiver(activity, receiver,
-            IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE), ContextCompat.RECEIVER_EXPORTED)
-    }
-
-    fun initialize() {
-        activity.lifecycleScope.launch {
-            runCatching { refreshDownload() }.onFailure { reportFailure(it) }
-        }
-    }
 
     fun check(isManual: Boolean = false) {
         if (isChecking) return
@@ -81,7 +44,6 @@ class GitHubUpdateManager(private val activity: ComponentActivity) {
         isChecking = true
         activity.lifecycleScope.launch {
             runCatching {
-                if (refreshDownload()) return@runCatching
                 status = "正在检查 GitHub 更新…"
                 val latest = withContext(Dispatchers.IO) { fetch() }
                 val comparison = compareVersions(latest.tag, BuildConfig.VERSION_NAME)
@@ -137,7 +99,7 @@ class GitHubUpdateManager(private val activity: ComponentActivity) {
             val uri = url.toUri()
             checkPredictable(uri.scheme == "https" && uri.host == "github.com" &&
                 uri.path.orEmpty().startsWith("/rD227/ChaoxingSignFaker/releases/download/")) { "更新附件地址无效" }
-            GitHubRelease(json.getString("tag_name"), json.optString("body"), url, asset.getLong("id"))
+            GitHubRelease(json.getString("tag_name"), json.optString("body"), url)
         }
     }
 
@@ -155,92 +117,34 @@ class GitHubUpdateManager(private val activity: ComponentActivity) {
         }
     }
 
-    fun download() {
+    fun openUpdateInBrowser() {
         val latest = release ?: return
-        release = null
-        activity.lifecycleScope.launch {
-            runCatching {
-                if (refreshDownload()) return@runCatching
-                val filename = "release-${latest.assetId}.apk"
-                val request = DownloadManager.Request(latest.url.toUri())
-                    .setTitle("ChaoxingSignFaker ${latest.tag}")
-                    .setDescription("下载完成后返回应用安装")
-                    .setMimeType("application/vnd.android.package-archive")
-                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    .setDestinationInExternalFilesDir(activity, Environment.DIRECTORY_DOWNLOADS, filename)
-                val id = downloads.enqueue(request)
-                activity.chaoxingDataStore.updateData {
-                    it.toBuilder().setUpdateDownloadId(id).setUpdateFilename(filename).build()
-                }
-                isDownloading = true
-                status = "更新下载中，可在通知栏查看进度"
-            }.onFailure { reportFailure(it) }
-        }
-    }
-
-    suspend fun refreshDownload(): Boolean {
-        val data = activity.chaoxingDataStore.data.first()
-        if (data.updateDownloadId <= 0) return false
-        downloads.query(DownloadManager.Query().setFilterById(data.updateDownloadId)).use { cursor ->
-            if (cursor.moveToFirst()) {
-                when (cursor.getInt(cursor.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))) {
-                    DownloadManager.STATUS_SUCCESSFUL -> {
-                        val folder = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
-                        val archive = folder?.let {
-                            activity.packageManager.getPackageArchiveInfo(File(it, data.updateFilename).path, 0)
-                        }
-                        if (archive != null && archive.packageName == BuildConfig.APPLICATION_ID &&
-                            PackageInfoCompat.getLongVersionCode(archive) > BuildConfig.VERSION_CODE) {
-                            isDownloaded = true
-                            isDownloading = false
-                            status = "更新已下载，点击安装更新"
-                            return true
-                        }
-                        status = "下载的安装包无效或版本未增加，请重新检查"
-                    }
-                    DownloadManager.STATUS_PENDING, DownloadManager.STATUS_RUNNING, DownloadManager.STATUS_PAUSED -> {
-                        isDownloading = true
-                        status = "更新下载中，可在通知栏查看进度"
-                        return true
-                    }
-                    DownloadManager.STATUS_FAILED -> status = "下载失败，请重新检查更新"
-                }
+        runCatching {
+            val intent = Intent(Intent.ACTION_VIEW, latest.url.toUri()).apply {
+                addCategory(Intent.CATEGORY_BROWSABLE)
+                selector = Intent(Intent.ACTION_VIEW, "https://".toUri())
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
             }
-        }
-        downloads.remove(data.updateDownloadId)
-        activity.chaoxingDataStore.updateData { it.toBuilder().clearUpdateDownloadId().clearUpdateFilename().build() }
-        isDownloaded = false
-        isDownloading = false
-        return false
-    }
-
-    fun install() {
-        activity.lifecycleScope.launch {
-            runCatching {
-                if (!refreshDownload() || !isDownloaded) return@runCatching
-                if (!activity.packageManager.canRequestPackageInstalls()) {
-                    permissionLauncher.launch(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                        "package:${BuildConfig.APPLICATION_ID}".toUri()))
-                    return@runCatching
-                }
-                val id = activity.chaoxingDataStore.data.first().updateDownloadId
-                val uri = downloads.getUriForDownloadedFile(id)
-                checkPredictable(uri != null) { "下载文件不可用，请重新下载" }
-                activity.startActivity(Intent(Intent.ACTION_VIEW)
-                    .setDataAndType(uri, "application/vnd.android.package-archive")
-                    .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))
-            }.onFailure { reportFailure(it) }
+            activity.startActivity(intent)
+            release = null
+            status = "已在默认浏览器打开 ${latest.tag} 下载链接"
+        }.onFailure { error ->
+            reportFailure(error)
+            Toast.makeText(activity, status, Toast.LENGTH_LONG).show()
         }
     }
 
     private fun reportFailure(error: Throwable) {
         if (error is CancellationException) throw error
-        status = error.message ?: "更新操作失败，请检查网络后重试"
+        status = if (error is ActivityNotFoundException) {
+            "未找到可用浏览器，请先安装或启用浏览器后重试"
+        } else {
+            error.message ?: "更新操作失败，请检查网络后重试"
+        }
         error.printStackTrace()
     }
 
     fun close() {
-        activity.unregisterReceiver(receiver)
         client.dispatcher.cancelAll()
         if (isChecking) isAutomaticCheckDone = false
     }

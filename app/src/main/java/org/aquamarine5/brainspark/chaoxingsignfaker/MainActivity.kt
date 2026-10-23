@@ -172,7 +172,6 @@ class MainActivity : ComponentActivity() {
         pendingSignRequest = intent.parseExternalSignRequest()
         isPendingOpenAllowExternalQuerySetting =
             intent.isOpenSettingToAllowExternalQueryPermission()
-        updateManager.initialize()
         enableEdgeToEdge()
         setContent {
             val hapticFeedback = LocalHapticFeedback.current

@@ -12,8 +12,36 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.4.20"
 }
 
+def versionPropertiesFile = file('version.properties')
+def versionProperties = new Properties()
+versionPropertiesFile.withInputStream { versionProperties.load(it) }
+def storedVersionCode = versionProperties.getProperty('VERSION_CODE')
+def storedVersionName = versionProperties.getProperty('VERSION_NAME')
+if (!(storedVersionCode ==~ /[0-9]+/) || !(storedVersionName ==~ /[0-9]+\.[0-9]+\.[0-9]+/)) {
+    throw new GradleException('version.properties must contain VERSION_CODE and a numeric x.y.z VERSION_NAME')
+}
+def currentVersionCode = storedVersionCode.toInteger()
+if (currentVersionCode >= 2100000000) {
+    throw new GradleException('VERSION_CODE has reached the Android version code limit')
+}
+def nextVersionCode = currentVersionCode + 1
+def versionNameParts = storedVersionName.tokenize('.')
+versionNameParts[-1] = (versionNameParts[-1].toBigInteger() + 1).toString()
+def nextVersionName = versionNameParts.join('.')
+def applicationProjectPath = project.path
+def artifactBuildTask = ~/^(assemble|bundle|package|install)(Debug|Release)(Bundle|Apk)?$/
 
-
+gradle.taskGraph.whenReady { graph ->
+    def isArtifactBuild = graph.allTasks.any { task ->
+        task.project.path == applicationProjectPath && artifactBuildTask.matcher(task.name).matches()
+    }
+    if (isArtifactBuild && !gradle.startParameter.dryRun) {
+        versionPropertiesFile.withWriter('UTF-8') { writer ->
+            writer.write("VERSION_CODE=${nextVersionCode}\nVERSION_NAME=${nextVersionName}\n")
+        }
+        logger.lifecycle("App version: ${storedVersionName} (${currentVersionCode}) -> ${nextVersionName} (${nextVersionCode})")
+    }
+}
 
 android {
     namespace = "org.aquamarine5.brainspark.chaoxingsignfaker"
@@ -28,8 +56,8 @@ android {
         minSdk = 26
         targetSdk = 37
         manifestPlaceholders["BAIDU_MAPS_API_KEY"] = providers.environmentVariable("BAIDU_MAPS_API_KEY").getOrElse("")
-        versionCode = 1_1903_0031
-        versionName = "1.19.3"
+        versionCode = currentVersionCode
+        versionName = storedVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -74,6 +102,15 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+}
+
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        variant.outputs.each { output ->
+            output.versionCode.set(providers.provider { nextVersionCode })
+            output.versionName.set(providers.provider { nextVersionName })
+        }
     }
 }
 

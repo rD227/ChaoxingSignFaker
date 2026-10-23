@@ -24,10 +24,10 @@ https://api.github.com/repos/rD227/ChaoxingSignFaker/releases/latest
 
 - “稍后再说”：本次不提示，下次冷启动仍检查。
 - “忽略此次更新”：保存此 Release 标签，更高版本仍会提示；手动检查可重新显示已忽略版本。
-- APK 交由系统下载管理器下载，完成后在应用内点击“安装更新”，由系统安装器处理，不跳转浏览器。
+- 点击“浏览器下载更新”，直接通过默认浏览器打开此 Release 的 APK 下载链接，由浏览器下载并交给系统安装器安装；应用不下载 APK，也不请求安装权限。
 - 使用 Gradle 默认 APK 名：优先 `app-release.apk`，兼容 `app-release-unsigned.apk`。未签名包需要正式签名后才能安装，建议发布签名的 `app-release.apk`。
-- 标签使用 `v1.19.4` 等数字版本。每次发布增加 `versionCode` 和 `versionName`，并保持自己的签名密钥一致；系统安装器检查签名，安装前额外核对包名与版本号。
-- 检查更新使用独立 HTTP 客户端，不携带学习通会话。更新状态保存在本地 DataStore。
+- 标签使用与发布 APK 对应的 `v1.19.4` 等数字版本。构建时自动增加 `versionCode` 和 `versionName`；保持自己的签名密钥一致，安装包的签名和版本由系统安装器校验。
+- 检查更新使用独立 HTTP 客户端，不携带学习通会话。忽略更新的选择保存在本地 DataStore。
 
 ## 本地构建
 
@@ -38,6 +38,14 @@ https://api.github.com/repos/rD227/ChaoxingSignFaker/releases/latest
 ```
 
 按本项目 `AGENTS.md` 的要求，不运行测试任务。
+
+### 自动递增版本
+
+版本保存于 `app/version.properties`，记录最近一次构建使用的版本。每次实际构建 Debug 或 Release APK/AAB 时，`VERSION_CODE` 加 1，`VERSION_NAME` 的最后一段加 1，例如 `1.19.3 → 1.19.4`。同一次 Gradle 调用同时构建 Debug 和 Release 只递增一次，两个产物及其 `BuildConfig` 使用相同版本。
+
+Android Studio 同步、`help`、`clean` 及 `--dry-run` 不改写版本文件。版本在构建任务开始前写入，因此构建中途失败也会消耗该版本号。单独执行源码编译或 Lint 不递增，除非此次任务同时包含 APK/AAB 的构建任务。
+
+构建完成后，从 APK 的 `output-metadata.json` 读取实际版本来创建 GitHub Release 标签。版本文件应与代码一起提交，其他工作副本和 CI 以仓库中记录的值为起点，不共享本机尚未提交的递增值。
 
 原作者签名文件已移除。Debug 使用本机调试签名。正式 Release 可以在 Android Studio 中签名，或配置以下环境变量：
 
