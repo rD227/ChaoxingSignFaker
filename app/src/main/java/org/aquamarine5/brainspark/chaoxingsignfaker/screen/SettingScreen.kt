@@ -117,6 +117,7 @@ fun SettingScreen(
         var isExternalProviderInformationTipsDialogVisible by remember { mutableStateOf(false) }
         LaunchedEffect(Unit) {
             context.chaoxingDataStore.data.first().apply {
+                isAlwaysForceSign = preferences.alwaysForceSign
                 isIgnoreAllConsistentDeviceCodeComponents =
                     preferences.isIgnoreAllConsistentDeviceCodeComponents
                 isAllowExternalProviderFetchInformation =
@@ -538,7 +539,7 @@ fun SettingScreen(
                         .padding(horizontal = 8.dp)
                         .clickable {
                             isUiDevelopedMode = !isUiDevelopedMode
-                            isDevelopedMode = !isUiDevelopedMode
+                            isDevelopedMode = isUiDevelopedMode
                             hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
                             coroutineScope.launch(Dispatchers.IO) {
                                 context.chaoxingDataStore.updateData {
@@ -577,6 +578,22 @@ fun SettingScreen(
             exit = slideOutVertically()
         ) {
             Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("总是强制签到", modifier = Modifier.weight(1f))
+                    Switch(isAlwaysForceSign, onCheckedChange = { isEnabled ->
+                        coroutineScope.launch {
+                            val data = context.chaoxingDataStore.updateData {
+                                it.toBuilder().setPreferences(
+                                    it.preferences.toBuilder().setAlwaysForceSign(isEnabled)
+                                ).build()
+                            }
+                            isAlwaysForceSign = data.preferences.alwaysForceSign
+                        }
+                    })
+                }
                 var isDataStoreDialogVisible by remember { mutableStateOf(false) }
                 Button(onClick = {
                     hapticFeedback.performHapticFeedback(HapticFeedbackType.ContextClick)
