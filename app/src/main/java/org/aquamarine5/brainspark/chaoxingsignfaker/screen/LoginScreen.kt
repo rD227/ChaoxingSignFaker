@@ -277,7 +277,7 @@ fun LoginPage(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(buildAnnotatedString {
-                                    append("还是有问题？\n联系作者发送邮件到：")
+                                    append("还是有问题？\n联系原作者发送邮件到：")
                                     withStyle(
                                         SpanStyle(
                                             fontFamily = FontGilroy,

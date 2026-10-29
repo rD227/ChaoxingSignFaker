@@ -274,7 +274,7 @@ fun SettingScreen(
                 Icon(painterResource(R.drawable.ic_github), contentDescription = "github")
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(buildAnnotatedString {
-                    append("查看本修改版源码\n前往：")
+                    append("查看本修改版源码 或者请赞赏原作者！\n前往：")
                     withStyle(
                         SpanStyle(
                             fontFamily = FontGilroy,
@@ -330,7 +330,7 @@ fun SettingScreen(
                 Icon(painterResource(R.drawable.ic_mail), contentDescription = "mail")
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(buildAnnotatedString {
-                    append("想要联系作者？\n发送邮件到：")
+                    append("想要联系原作者？\n发送邮件到：")
                     withStyle(
                         SpanStyle(
                             fontFamily = FontGilroy,
