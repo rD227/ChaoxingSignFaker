@@ -240,6 +240,7 @@ fun Throwable.snackbarReport(
 fun Throwable.logLocally() {
     if (this is CancellationException) throw this
     printStackTrace()
+    //just print to std android logger, or we can log it into local folder
 }
 
 val Throwable.isSessionObsoletedCausing: Boolean

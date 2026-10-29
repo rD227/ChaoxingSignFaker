@@ -1,6 +1,6 @@
 # ChaoxingSignFaker · rD227 修改版
 
-基于 [aquamarine5/ChaoxingSignFaker](https://github.com/aquamarine5/ChaoxingSignFaker) 修改，原作者为 aquamarine5 / Brainspark。保留原作者版权说明，继续使用 [GNU AGPL v3](LICENSE)。本修改版源码位于 [rD227/ChaoxingSignFaker](https://github.com/rD227/ChaoxingSignFaker)。
+基于 [aquamarine5/ChaoxingSignFaker](https://github.com/aquamarine5/ChaoxingSignFaker) 修改，原作者为 aquamarine5 / Brainspark。保留原作者版权说明，继续使用 [GNU AGPL v3](LICENSE)
 
 ## 修改内容
 
